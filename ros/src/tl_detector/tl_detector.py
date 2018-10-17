@@ -59,7 +59,8 @@ class TLDetector(object):
 
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
-	self.KDTree = KDTree(self.waypoints)
+	self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints.waypoints]
+	self.KDTree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
@@ -74,7 +75,7 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
+        light_wp,state = self.process_traffic_lights()
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -157,7 +158,8 @@ class TLDetector(object):
 			# Get stop line waypoint index
 			line = stop_line_positions[i]
 			if not self.KDTree:
-				self.KDTree = KDTree(self.waypoints)
+				self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints.waypoints]
+				self.KDTree = KDTree(self.waypoints_2d)
 			temp_wp_index = self.get_closest_waypoint(line[0], line[1])
 			
 			# Find closest stop line waypoint index
@@ -169,9 +171,9 @@ class TLDetector(object):
 
 	if closest_light:
 		state = self.get_light_state(closest_light)
-            return light_wp, state
+            	return light_wp_index, state
 
-        #self.waypoints = None
+        # There is no closest light in front of the car :
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
