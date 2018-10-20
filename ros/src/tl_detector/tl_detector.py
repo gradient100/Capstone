@@ -38,7 +38,7 @@ class TLDetector(object):
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
-
+   
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
@@ -52,14 +52,16 @@ class TLDetector(object):
 
 	self.waypoint_tree = None
 
+#	rospy.Rate(10)
         rospy.spin()
+
 
     def pose_cb(self, msg):
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
-	self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints.waypoints]
+	self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in waypoints.waypoints]
 	self.KDTree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
@@ -86,6 +88,8 @@ class TLDetector(object):
         if self.state != state:
             self.state_count = 0
             self.state = state
+	    #self.upcoming_red_light_pub.publish(Int32(light_wp))
+
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
@@ -95,7 +99,7 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
-    def get_closest_waypoint(self, pose):
+    def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -105,7 +109,12 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-	closest_index = self.waypoint_tree.query([x,y], 1)[1]
+        if not self.waypoint_tree:
+                #self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w $
+                self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints.waypoints]
+                self.waypoint_tree = KDTree(self.waypoints_2d)
+        closest_index = self.waypoint_tree.query([x,y], 1)[1]
+
 
         return closest_index
 
@@ -160,7 +169,7 @@ class TLDetector(object):
 			if not self.KDTree:
 				self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints.waypoints]
 				self.KDTree = KDTree(self.waypoints_2d)
-			temp_wp_index = self.get_closest_waypoint(line[0], line[1])
+    			temp_wp_index = self.get_closest_waypoint(line[0], line[1])
 			
 			# Find closest stop line waypoint index
 			d = temp_wp_index - car_wp_index
@@ -171,7 +180,7 @@ class TLDetector(object):
 
 	if closest_light:
 		state = self.get_light_state(closest_light)
-            	return light_wp_index, state
+            	return line_wp_index, state
 
         # There is no closest light in front of the car :
         return -1, TrafficLight.UNKNOWN

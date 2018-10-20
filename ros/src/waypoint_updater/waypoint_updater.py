@@ -26,6 +26,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+MAX_DECEL = 5
 
 
 class WaypointUpdater(object):
@@ -50,7 +51,7 @@ class WaypointUpdater(object):
         self.loop()
 
     def loop(self):
-	rate = rospy.Rate(50)
+	rate = rospy.Rate(10)
 	while not rospy.is_shutdown():
 		#if self.pose and self.base_waypoints and self.waypoints_2d:
 
@@ -64,7 +65,8 @@ class WaypointUpdater(object):
 	x = self.pose.pose.position.x
 	y = self.pose.pose.position.y
 	if not self.waypoint_tree:
-		self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.base_waypoints.waypoints]
+		#self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.base_waypoints.waypoints]
+		self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.base_lane.waypoints]
                 self.waypoint_tree = KDTree(self.waypoints_2d)
 	closest_index = self.waypoint_tree.query([x,y], 1)[1]
 	# is closest waypoint ahead or behind vehicle?
@@ -81,7 +83,7 @@ class WaypointUpdater(object):
 	# closest coordinate is behind position position
 	if dot < 0: 
 		closest_index = (closest_index + 1) % len(self.waypoints_2d)
-	return closest_index
+	return closest_index 
 
     #def publish_waypoints(self, closest_index):
 #       lane = Lane()
@@ -121,7 +123,7 @@ class WaypointUpdater(object):
 			vel = 0.
 
 		p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
-		temp .append(p)
+		temp.append(p)
 
 	return temp
 
@@ -139,7 +141,7 @@ class WaypointUpdater(object):
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
-        pass
+        self.stopline_wp_index = msg.data
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
