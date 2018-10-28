@@ -35,16 +35,4 @@ class TLClassifier(object):
 	if cv2.countNonZero(frame_threshed1) + cv2.countNonZero(frame_threshed2) > THRESH_RED:
 		return TrafficLight.RED
 
-#	YELLOW_MIN = np.array([40.0/360*255, 100, 100], np.uint8)
-#	YELLOW_MAX = np.array([66.0/360*255, 255, 255], np.uint8)
-#        frame_threshed3 = cv2.inRange(hsv_img, YELLOW_MIN, YELLOW_MAX)
-#        if cv2.countNonZero(frame_threshed3) > THRESH:
-#                return TrafficLight.YELLOW
-
-#	GREEN_MIN = np.array([90.0/360*255, 100, 100], np.uint8)
-#        GREEN_MAX = np.array([140.0/360*255, 255, 255], np.uint8)
-#        frame_threshed4 = cv2.inRange(hsv_img, GREEN_MIN, GREEN_MAX)
-#        if cv2.countNonZero(frame_threshed3) > THRESH:
-#                return TrafficLight.GREEN
-
 	return TrafficLight.UNKNOWN
