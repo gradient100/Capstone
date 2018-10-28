@@ -1,4 +1,9 @@
 from styx_msgs.msg import TrafficLight
+import cv2
+import numpy as np
+
+THRESH_RED = 40
+FRACTION_KEPT = 1/3.0
 
 class TLClassifier(object):
     def __init__(self):
@@ -15,5 +20,19 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #TODO implement light color prediction
-        return TrafficLight.UNKNOWN
+	image = image[0:int(image.shape[0] * FRACTION_KEPT) , : ]
+	hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+	
+	RED_MIN1 = np.array([0,100,100], np.uint8)
+	RED_MAX1 = np.array([10,255,255], np.uint8)
+
+	# hsv range goes from 0-180 in Open CV
+	RED_MIN2 = np.array([170, 100, 100], np.uint8) 
+	RED_MAX2 = np.array([180, 255, 255], np.uint8)
+
+	frame_threshed1 = cv2.inRange(hsv_img, RED_MIN1, RED_MAX1)
+	frame_threshed2 = cv2.inRange(hsv_img, RED_MIN2, RED_MAX2)
+	if cv2.countNonZero(frame_threshed1) + cv2.countNonZero(frame_threshed2) > THRESH_RED:
+		return TrafficLight.RED
+
+	return TrafficLight.UNKNOWN

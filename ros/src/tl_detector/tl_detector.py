@@ -11,6 +11,8 @@ import tf
 import cv2
 import yaml
 from scipy.spatial import KDTree
+import  PyKDL
+import math
 
 STATE_COUNT_THRESHOLD = 3
 
@@ -129,16 +131,64 @@ class TLDetector(object):
 
         """
 	
-        #if(not self.has_image):
-        #    self.prev_light_loc = None
-        #    return False
+        if(not self.has_image):
+        	self.prev_light_loc = None
+        	return False
 
-        #cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
-        #Get classification
-        #return self.light_classifier.get_classification(cv_image)
-	return light.state
-    def process_traffic_lights(self):
+        #x, y = self.project_to_image_plane(light.pose.pose.position)
+
+	#if (x < 0) or (y<0) or (x>=cv_image.shape[1]) or (y>=cv_image.shape[0]):
+	#	return False
+
+	#imm = cv_image
+	#crop = 90
+	#xmin = x-crop if (x-crop) >=0 else 0
+	#ymin = y-crop if (y-crop) >=0 else 0
+
+	#xmax = x + crop if (x+crop) <= imm.shape[1]-1 else imm.shape[1]-1
+	#ymax = y + crop if (y+crop) <= imm.shape[0]-1 else imm.shape[0]-1
+	#imm_cropped = imm[ymin:ymax, xmin:xmax]
+
+	# return self.light_classifier.get_classification(imm_cropped)
+	return self.light_classifier.get_classification(cv_image)
+
+
+	#return light.state
+
+    def project_to_image_plane(self, point_in_world):
+
+	#fx = self.config['camera_info']['focal_length_x']
+    	#fy = self.config['camera_info']['focal_length_y']
+	image_width = self.config['camera_info']['image_width']
+	image_height = self.config['camera_info']['image_height']
+
+	trans = None
+	try:
+		now = rospy.Time.now()
+		self.listener.waitForTransform("/base_link", "/world", now, rospy.Duration(1.0))
+		(trans, rot) = self.listener.lookupTransform("/base_link", "/world", now)
+	except (tf.Exception, tf.LookupException, tf.ConnectivityException):
+		rospy.logerr("Failed to find camera to map transform")
+
+	f = 2300
+	x_offset = -30
+	y_offset = 340
+	fx = f
+	fy = f
+	piw = PyKDL.Vector(point_in_world.x, point_in_world.y, point_in_world.z)
+	R = PyKDL.Rotation.Quaternion(*rot)
+	T = PyKDL.Vector(*trans)
+	p_car = R*piw+T
+
+	x = -p_car[1]/p_car[0]*fx + image_width/2 + x_offset
+	y = -p_car[2]/p_car[0]*fx + image_height/2 + y_offset
+
+	return (int(x), int(y))
+
+
+    def process_traffic_lights1(self):
         """Finds closest visible traffic light, if one exists, and determines its
             location and color
 
@@ -147,12 +197,16 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #light = None
 	closest_light = None
 	line_wp_index = None
 
+	distance = lambda a, b: math.sqrt( (a[0]-b[0])**2 + (a[1]-b[1])**2 )
+
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
+	
+
+
         if(self.pose):
         	#car_position = self.get_closest_waypoint(self.pose.pose)
 		
@@ -163,6 +217,7 @@ class TLDetector(object):
 
 	        #TODO find the closest visible traffic light (if one exists)
 		diff = len(self.waypoints.waypoints)
+		
 		for i, light in enumerate(self.lights):
 			# Get stop line waypoint index
 			line = stop_line_positions[i]
@@ -184,6 +239,54 @@ class TLDetector(object):
 
         # There is no closest light in front of the car :
         return -1, TrafficLight.UNKNOWN
+
+
+    def process_traffic_lights(self):
+        """Finds closest visible traffic light, if one exists, and determines its
+            location and color
+
+        Returns:
+            int: index of waypoint closes to the upcoming stop line for a traffic light (-1 if none exists)
+            int: ID of traffic light color (specified in styx_msgs/TrafficLight)
+	"""
+        closest_light = None
+        line_wp_index = None
+
+        # List of positions that correspond to the line to stop in front of for a given intersection
+        stop_line_positions = self.config['stop_line_positions']
+        if(self.pose):
+                if not self.KDTree:
+                        self.KDTree = KDTree(self.waypoints)
+
+                car_wp_index = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
+
+                #TODO find the closest visible traffic light (if one exists)
+                min_gap = len(self.waypoints.waypoints) # index gap from car to closest stop line-- initializes to max gap
+                for i, light in enumerate(self.lights):
+                        # Get stop line waypoint index
+                        stop_line = stop_line_positions[i]
+                        if not self.KDTree:
+                                self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints.waypoints]
+                                self.KDTree = KDTree(self.waypoints_2d)
+                        current_line_wp_index = self.get_closest_waypoint(stop_line[0], stop_line[1])
+
+                        # Find closest stop line waypoint index
+                        gap = current_line_wp_index - car_wp_index
+                        if gap >= 0 and gap <= min_gap: # stop line needs to be in front of car, and if this is closest light, update
+                                min_gap = gap
+                                closest_light = light
+                                closest_line_wp_index = current_line_wp_index
+
+        if closest_light:
+                state = self.get_light_state(closest_light)
+                return closest_line_wp_index, state
+
+        # There is no closest light in front of the car :
+        return -1, TrafficLight.UNKNOWN
+
+
+
+
 
 if __name__ == '__main__':
     try:
