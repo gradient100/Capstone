@@ -1,7 +1,5 @@
 # Programming a Real Self-Driving Car
 
-## System Integration Project
-
 ## Introduction
 
 ![alt text](/imgs/readme_img0.jpg "Hello, I am Carla!")
