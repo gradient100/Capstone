@@ -5,13 +5,13 @@
 
 ## Introduction
 
-![alt text] (https://github.com/gradient100/Capstone/blob/master/imgs/readme_img0.jpg "Hello, I am Carla!")
+![alt text] (https://github.com/gradient100/Capstone/imgs/readme_img0.jpg "Hello, I am Carla!")
 
 This is the capstone project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car.  I implemented software to automously drive Udacity's self-drivind car, Carla, equipped with the appropriate sensors and actuators, around a test track with traffic lights.  The Robot Operating System, ROS, was used to implement nodes for trajectory planning, drive-by-wire control, and traffic light detection and classification.
 
 ## System Architecture
 
-![alt text] (https://github.com/gradient100/Capstone/blob/master/imgs/readme_img1.jpg "Hello, I look important!")
+![alt text] (https://github.com/gradient100/Capstone/imgs/readme_img1.png "Hello, I look important!")
 
 * This project consists of three modules: `Perception`,  `Planning`,  and `Control`.  Each module consists of at least one ROS node, which utilizes publish/subscribe (pub-sub) and request/response service requests to communicate between nodes.  
 * The `Perception` module perceives the environment (localization of the car's position, lane lines, traffic lights, etc.) state of the traffic lights,with onboard sensors (cameras, lidar, radar, etc.).
