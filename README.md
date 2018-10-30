@@ -1,6 +1,6 @@
-## Programming a Real Self-Driving Car
+# Programming a Real Self-Driving Car
 
-# System Integration Project
+## System Integration Project
 
 ## Introduction
 
@@ -15,22 +15,22 @@ Name | Udacity Email | Role
 Vinh Nghiem | vinh.nghiem@gmail.com | Team Leader, Sole Member, Cheerleader, and Mascot
 
 ## System Architecture
-![alttext](/imgs/readme_img1.png?raw=true "I look impressive")
+![alttext](/imgs/readme_img1.png?raw=true "I look impressive!")
 
 * This project consists of three modules: `Perception`,  `Planning`,  and `Control`.  Each module consists of at least one ROS node, which utilizes publish/subscribe (pub-sub) and request/response service requests to communicate between nodes.  
-* The `Perception` module perceives the environment (localization of the car's position, lane lines, traffic lights, etc.) state of the traffic lights,with onboard sensors (cameras, lidar, radar, etc.).
+* The `Perception` module perceives the environment (localization of the car's position, lane lines, traffic lights, traffic light color, etc.) with onboard sensors (cameras, lidar, radar, etc.).
 * The `Planning` module dynamically receives the information from perception to publish a trajectory of waypoints and their target velocities.
 * The `Control` module dynamically receives the waypoints from planning and smoothly executes the target velocities by directing the appropriate steering, throttle, brake level.
 
 ## Implementation
 
-As the above system schematic shows, there are six ROS nodes in three different modules.  Of these, two are already implemented by Udacity: `Obstacle Detector`, `Waypoint Loader`, and  `Waypoint Follower` is unimplemented, as that use case is unanticipated in testing.  Lastly, I have implemented the remaining three ROS nodes : `Traffic Light Detector`, `Waypoint Updater`, and `Drive by Wire` .
+As the above system schematic shows, there are six ROS nodes in three different modules.  Of these, two are already implemented by Udacity: `Obstacle Detector`, `Waypoint Loader`, while  `Waypoint Follower` is unimplemented, as that use case is unanticipated in testing.  Lastly, I have implemented the remaining three ROS nodes : `Traffic Light Detector`, `Waypoint Updater`, and `Drive by Wire` .
 
 ### Traffic Light Detector
 
 This node uses the subscribed topics: `/base_waypoints`, `/current_pose`, and `/image_color` to detect  (1) the nearest traffic light in the configuration list of traffic lights to the car's current published position and (2) whether this nearest traffic light is red.  If the light is red, the node decelerates by calculating and publishing the appropriate speeds at each waypoint from the current waypoint to the stop line at the nearest red traffic light.
 
-Whether the light color is red is implemented by taking the subscibed color image and converting to HSV space.  The red color of traffic lights has a hue in a specific range.  The image is then cropped to the upper third (since anticipated traffic lights are high in the field of view), and If this hue occurs above a certain threshold in the image, it is concluded that there are red lights in the image. This method would be adequate for this use case of a highway track with traffic lights and no other (red) cars, because, fortunately, traffic lights have a predetermined position and the same red hue at that position does not regularly exist outside of traffic lights (even red tree leaves are usually cleared around traffic lights, and the red hue of the afternoon horizon can usually be filtered out with the appropriate hue and saturation ranges).
+Whether the light color is red is implemented by taking the subscribed color image and converting to HSV space.  The red color of traffic lights has a hue in a specific range.  The image is then cropped to the upper third (since anticipated traffic lights are high in the field of view), and If this hue occurs above a certain threshold in the image, it is concluded that there are red lights in the image. This method would be adequate for this use case of a highway track with traffic lights and no other (red) cars, because, fortunately, traffic lights have a predetermined position and the same red hue at that position does not regularly exist outside of traffic lights (even red tree leaves are usually cleared around traffic lights, and the red hue of the afternoon horizon can usually be filtered out with the appropriate hue and saturation ranges).
 
 ### Waypoint Updater
 
