@@ -10,7 +10,7 @@ This is the capstone project of the Udacity Self-Driving Car Nanodegree: Program
 
 ## System Architecture
 
-![alt text] (/imgs/readme_img1.png)
+![alttext] (/imgs/readme_img1.png)
 
 * This project consists of three modules: `Perception`,  `Planning`,  and `Control`.  Each module consists of at least one ROS node, which utilizes publish/subscribe (pub-sub) and request/response service requests to communicate between nodes.  
 * The `Perception` module perceives the environment (localization of the car's position, lane lines, traffic lights, etc.) state of the traffic lights,with onboard sensors (cameras, lidar, radar, etc.).
