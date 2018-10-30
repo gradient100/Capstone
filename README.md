@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## Programming a Real Self-Driving Car
 
 # System Integration Project
