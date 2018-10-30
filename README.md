@@ -5,7 +5,7 @@
 
 ## Introduction
 
-![alt text] (https://raw.github.com/gradient100/Capstone/imgs/readme_img0.jpg "Hello, I am Carla!")
+![alt text] (https://raw.github.com/gradient100/Capstone/master/imgs/readme_img0.jpg "Hello, I am Carla!")
 
 This is the capstone project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car.  I implemented software to automously drive Udacity's self-drivind car, Carla, equipped with the appropriate sensors and actuators, around a test track with traffic lights.  The Robot Operating System, ROS, was used to implement nodes for trajectory planning, drive-by-wire control, and traffic light detection and classification.
 
