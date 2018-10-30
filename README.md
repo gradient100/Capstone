@@ -8,7 +8,7 @@
 
 This is the capstone project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car.  I implemented software to automously drive Udacity's self-drivind car, Carla, equipped with the appropriate sensors and actuators, around a test track with traffic lights.  The Robot Operating System, ROS, was used to implement nodes for trajectory planning, drive-by-wire control, and traffic light detection and classification.
 
-### Team: The Slow and the Cautious
+<center> ### Team: The Slow and the Cautious </center>
 
 Name | Udacity Email | Role
 --- | --- | ---
@@ -47,12 +47,8 @@ This node uses the subscribed  topics: `/final_waypoints`, `/twist_cmd`, `/vehic
 This node sends the `/twist_cmd` message (with target linear and angular velocities), and current velocity, to the twist controller node to determine required steering and throttle (already implemented), and brake.  Brake is calculated as the wheel torque needed, under a fixed maximum deceleration.  Throttle is determined using a pre-implemented pid controller, unless braking is required, and then throttle is set to 0.   Steering is pre-implemented with a yaw controller.
 
 ## Installation
-=======
-Test : This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
->>>>>>> b3f74e9900ae6edbb469663a5789bb2a61b1a84e
 
 Please use **one** of the two installation options, either native **or** docker installation.
-
 
 * Be sure that your workstation is running Ubuntu 16.04 Xenial Xerus or Ubuntu 14.04 Trusty Tahir. [Ubuntu downloads can be found here](https://www.ubuntu.com/download/desktop).
 * If using a Virtual Machine to install Ubuntu, use the following configuration as minimum:
