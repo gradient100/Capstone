@@ -1,4 +1,4 @@
-# Capstone Project: Programming a Real Self-Driving Car
+# Capstone Project | Programming a Real Self-Driving Car
 
 ### Team: The Slow and the Cautious
 
