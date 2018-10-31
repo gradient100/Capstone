@@ -40,9 +40,8 @@ class WaypointUpdater(object):
 	#self.pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 	self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
-	self.base_lane = None
 	self.pose = None
-	#self.base_waypoints = None
+	self.base_waypoints = None
 	self.waypoints_2d = None
 	self.waypoint_tree = None
 
@@ -55,9 +54,8 @@ class WaypointUpdater(object):
 	while not rospy.is_shutdown():
 		#if self.pose and self.base_waypoints and self.waypoints_2d:
 
-		if self.pose and self.base_lane and self.waypoints_2d:
+		if self.pose and self.base_waypoints and self.waypoints_2d:
 			closest_waypoint_index = self.get_closest_waypoint_index()
-			#self.publish_waypoints(closest_waypoint_index)
 			self.publish_waypoints()
 		rate.sleep()
 
@@ -65,8 +63,7 @@ class WaypointUpdater(object):
 	x = self.pose.pose.position.x
 	y = self.pose.pose.position.y
 	if not self.waypoint_tree:
-		#self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.base_waypoints.waypoints]
-		self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.base_lane.waypoints]
+		self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.base_waypoints.waypoints]
                 self.waypoint_tree = KDTree(self.waypoints_2d)
 	closest_index = self.waypoint_tree.query([x,y], 1)[1]
 	# is closest waypoint ahead or behind vehicle?
@@ -80,16 +77,10 @@ class WaypointUpdater(object):
 
 	dot = np.dot(pos_vec-prev_vec, cl_vec-pos_vec)
 	
-	# closest coordinate is behind position position
+	# closest coordinate is behind vehicle position
 	if dot < 0: 
 		closest_index = (closest_index + 1) % len(self.waypoints_2d)
 	return closest_index 
-
-    #def publish_waypoints(self, closest_index):
-#       lane = Lane()
-#       lane.waypoints = self.base_waypoints.waypoints[closest_index:closest_index + LOOKAHEAD_WPS]
-#       self.pub.publish(lane)
-
 
     def publish_waypoints(self):
 	final_lane = self.generate_lane()
@@ -100,12 +91,12 @@ class WaypointUpdater(object):
 
 	closest_index = self.get_closest_waypoint_index()
 	farthest_index = closest_index + LOOKAHEAD_WPS
-	base_waypoints = self.base_lane.waypoints[closest_index:farthest_index]
+	ahead_waypoints = self.base_waypoints.waypoints[closest_index:farthest_index]
 
 	if self.stopline_wp_index==-1 or (self.stopline_wp_index >= farthest_index):
-		lane.waypoints = base_waypoints
+		lane.waypoints = ahead_waypoints
 	else:
-		lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_index)
+		lane.waypoints = self.decelerate_waypoints(ahead_waypoints, closest_index)
 
 	return lane
 
@@ -132,8 +123,7 @@ class WaypointUpdater(object):
         
 
     def waypoints_cb(self, waypoints):
-	#self.base_waypoints = waypoints
-	self.base_lane = waypoints
+	self.base_waypoints = waypoints
 	if not self.waypoints_2d:
 		self.waypoints_2d  = [[w.pose.pose.position.x, w.pose.pose.position.y] for w in waypoints.waypoints]
 		self.waypoint_tree = KDTree(self.waypoints_2d)
