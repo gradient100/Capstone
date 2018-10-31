@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 THRESH_RED = 40
-FRACTION_KEPT = 1/1.0
+FRACTION_KEPT = 1/3.0
 
 class TLClassifier(object):
     def __init__(self):
