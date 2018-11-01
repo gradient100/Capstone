@@ -51,10 +51,12 @@ class Controller(object):
 	
 	if targ_linear_vel == 0. and current_vel < 0.1:
 		throttle = 0.
-		brake = 700 #N*m
+		brake = 700. #N*m
 	elif throttle < .1 and vel_diff > 0:
-		throttle = 0
-		decel = min(abs(vel_diff), abs(self.decel_limit))
+		throttle = 0.
+		#decel = min(abs(vel_diff), abs(self.decel_limit))
+		decel = min(abs(1.0*vel_diff/sample_time), abs(self.decel_limit))
 		brake = abs(decel)*self.vehicle_mass*self.wheel_radius
+		#brake = min(abs(decel)*self.vehicle_mass*self.wheel_radius,700)
 
 	return throttle, brake, steering
